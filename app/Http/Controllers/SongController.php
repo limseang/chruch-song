@@ -11,20 +11,13 @@ use Illuminate\Support\Facades\Redirect;
 
 class SongController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function __construct()
     {
-        //
+        $this->middleware('auth:web');
     }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create( Request $request)
+    public function storeAPI(Request $request)
     {
-        // Validate the request data
+        // Validate the input
         $request->validate([
             'title' => 'required|string|max:255',
             'lyrics' => 'required|string',
@@ -32,81 +25,61 @@ class SongController extends Controller
             'arranger' => 'nullable|string|max:255',
         ]);
 
-        // Create a new song instance
-        $song = new Song();
-        $song->title = $request->input('title');
-        $song->lyrics = $request->input('lyrics');
-        $song->composer = $request->input('composer');
-        $song->arranger = $request->input('arranger');
-
-        // Save the song to the database
-        $song->save();
+        // Create a new song
+        $song = Song::create($request->only(['title', 'lyrics', 'composer', 'arranger']));
 
         return response()->json([
             'message' => 'Song created successfully!',
             'song' => $song,
-        ], 201);
-
+        ], 200);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-   public function store(Request $request)
-{
-    // Validate the input
-    $request->validate([
-        'title' => 'required|string|max:255',
-        'lyrics' => 'required|string',
-        'composer' => 'nullable|string|max:255',
-        'arranger' => 'nullable|string|max:255',
-    ]);
-
-    // Create a new song
-    $song = Song::create([
-        'title' => $request->input('title'),
-        'lyrics' => $request->input('lyrics'),
-        'composer' => $request->input('composer'),
-        'arranger' => $request->input('arranger'),
-    ]);
-
-    return response()->json([
-        'message' => 'Song created successfully!',
-        'song' => $song,
-    ], 201);
-}
-
-
-    /**
-     * Display the specified resource.
-     */
-    public function show()
+    public function store(Request $request)
     {
-        $song = Song::all();
-        return response()->json($song);
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'lyrics' => 'required|string',
+            'composer' => 'nullable|string|max:255',
+            'arranger' => 'nullable|string|max:255',
+        ]);
+
+        Song::create($request->only(['title', 'lyrics', 'composer', 'arranger']));
+
+        return redirect()->route('song_list')->with('success', 'Song uploaded successfully!');
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Song $song)
+    public function showWeb()
     {
-        
+        $songs = Song::all();
+        return view('dashboard/song_list', compact('songs'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Song $song)
+    public function edit($id)
     {
-        //
+        $song = Song::findOrFail($id);
+        return view('dashboard/edit_song', compact('song'));
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Song $song)
+    public function update(Request $request, $id)
     {
-        //
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'lyrics' => 'required|string',
+            'composer' => 'nullable|string|max:255',
+            'arranger' => 'nullable|string|max:255',
+        ]);
+
+        $song = Song::findOrFail($id);
+        $song->update($request->only(['title', 'lyrics', 'composer', 'arranger']));
+
+        return redirect()->route('song_list')->with('success', 'Song updated successfully!');
+    }
+
+    public function destroy($id)
+    {
+        $song = Song::findOrFail($id);
+        $song->delete();
+
+        return redirect()->route('song_list')->with('success', 'Song deleted successfully!');
     }
 }

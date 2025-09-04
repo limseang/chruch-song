@@ -10,21 +10,28 @@
     <div class="container">
       <header>Login</header>
       <form method="POST" action="{{ route('login.post') }}">
+        @csrf
         <div class="input-field">
-          <input type="text" required>
+          <input type="text" name="email" required value="{{ old('email') }}">
           <label>Email or Username</label>
+          @error('email')
+            <div style="color: red;">{{ $message }}</div>
+          @enderror
         </div>
         <div class="input-field">
-          <input class="pswrd" type="password" required>
+          <input class="pswrd" type="password" name="password" required>
           <span class="show">SHOW</span>
           <label>Password</label>
+          @error('password')
+            <div style="color: red;">{{ $message }}</div>
+          @enderror
         </div>
         <div class="button">
           <div class="inner"></div>
           <button type="submit">LOGIN</button>
         </div>
       </form>
-      <div class="auth">Or login with</div>
+      {{-- <div class="auth">Or login with</div>
       <div class="links">
         <div class="facebook">
           <i class="fab fa-facebook-square"><span>Facebook</span></i>
@@ -32,9 +39,9 @@
         <div class="google">
           <i class="fab fa-google-plus-square"><span>Google</span></i>
         </div>
-      </div>
+      </div> --}}
       <div class="signup">
-        Not a member? <a href="/sighup">Signup now</a>
+        Not a member? <a href="/signup">Signup now</a>
       </div>
     </div>
     <script>
